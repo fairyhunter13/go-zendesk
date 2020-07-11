@@ -8,7 +8,7 @@
         "channel": "email",
         "source": {
           "from": {
-            "address": "nukosuke@lavabit.com",
+            "address": "fairyhunter13@gmail.com",
             "name": "Yosuke Tamura"
           },
           "to": {
@@ -23,7 +23,7 @@
       "type": null,
       "subject": "Mail to create fixture ticket for testing",
       "raw_subject": "Mail to create fixture ticket for testing",
-      "description": "Mail to create fixture ticket for testing\n\nnukosuke (●ↀ ω ↀ●)",
+      "description": "Mail to create fixture ticket for testing\n\nfairyhunter13 (●ↀ ω ↀ●)",
       "priority": null,
       "status": "solved",
       "recipient": "support@d3v-terraform-provider.zendesk.com",

@@ -1,6 +1,8 @@
 package zendesk
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewBasicAuthCredential(t *testing.T) {
 	cred := NewBasicAuthCredential("john.doe@example.com", "password")
@@ -21,5 +23,16 @@ func TestNewAPITokenCredential(t *testing.T) {
 	}
 	if cred.Secret() != "apitoken" {
 		t.Fatalf("APITokenCredential: secret not match")
+	}
+}
+
+func TestNewOAuthCredential(t *testing.T) {
+	cred := NewOAuthCredential("hello")
+
+	if cred.Email() != "" {
+		t.Fatalf("OAuthCredential: email not match")
+	}
+	if cred.Secret() != "hello" {
+		t.Fatalf("OAuthCredential: secret not match")
 	}
 }

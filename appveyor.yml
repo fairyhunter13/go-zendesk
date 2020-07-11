@@ -1,6 +1,6 @@
 build: off
 
-clone_folder: c:\github.com\nukosuke\go-zendesk
+clone_folder: c:\github.com\fairyhunter13\go-zendesk
 
 environment:
   GOPATH: c:\gopath

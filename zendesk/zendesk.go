@@ -3,7 +3,6 @@ package zendesk
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -18,69 +17,45 @@ const (
 )
 
 var defaultHeaders = map[string]string{
-	"User-Agent":   "nukosuke/go-zendesk",
+	"User-Agent":   "fairyhunter13/go-zendesk",
 	"Content-Type": "application/json",
 }
 
+const (
+	spaceCharacter = " "
+)
+
 var subdomainRegexp = regexp.MustCompile("^[a-z0-9][a-z0-9-]+[a-z0-9]$")
+
+// HTTPClient specifies the client interface for doing requests.
+type HTTPClient interface {
+	Do(*http.Request) (*http.Response, error)
+}
 
 // Client of Zendesk API
 type Client struct {
 	baseURL    *url.URL
-	httpClient *http.Client
+	httpClient HTTPClient
 	credential Credential
 	headers    map[string]string
 }
 
 // NewClient creates new Zendesk API client
-func NewClient(httpClient *http.Client) (*Client, error) {
+func NewClient(httpClient HTTPClient, opts ...Option) (*Client, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
 
 	client := &Client{httpClient: httpClient}
 	client.headers = defaultHeaders
+
+	for _, opt := range opts {
+		err := opt(client)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return client, nil
-}
-
-// SetHeader saves HTTP header in client. It will be included all API request
-func (z *Client) SetHeader(key string, value string) {
-	z.headers[key] = value
-}
-
-// SetSubdomain saves subdomain in client. It will be used
-// when call API
-func (z *Client) SetSubdomain(subdomain string) error {
-	if !subdomainRegexp.MatchString(subdomain) {
-		return fmt.Errorf("%s is invalid subdomain", subdomain)
-	}
-
-	baseURLString := fmt.Sprintf(baseURLFormat, subdomain)
-	baseURL, err := url.Parse(baseURLString)
-	if err != nil {
-		return err
-	}
-
-	z.baseURL = baseURL
-	return nil
-}
-
-// SetEndpointURL replace full URL of endpoint without subdomain validation.
-// This is mainly used for testing to point to mock API server.
-func (z *Client) SetEndpointURL(newURL string) error {
-	baseURL, err := url.Parse(newURL)
-	if err != nil {
-		return err
-	}
-
-	z.baseURL = baseURL
-	return nil
-}
-
-// SetCredential saves credential in client. It will be set
-// to request header when call API
-func (z *Client) SetCredential(cred Credential) {
-	z.credential = cred
 }
 
 // get get JSON data from API and returns its body as []bytes
@@ -216,7 +191,12 @@ func (z *Client) delete(ctx context.Context, path string) error {
 func (z *Client) prepareRequest(ctx context.Context, req *http.Request) *http.Request {
 	out := req.WithContext(ctx)
 	z.includeHeaders(out)
-	out.SetBasicAuth(z.credential.Email(), z.credential.Secret())
+	switch z.credential.Type() {
+	case TypeBearer:
+		out.Header.Set("Authorization", TypeBearer+spaceCharacter+z.credential.Secret())
+	default:
+		out.SetBasicAuth(z.credential.Email(), z.credential.Secret())
+	}
 
 	return out
 }

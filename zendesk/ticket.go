@@ -58,6 +58,7 @@ type Ticket struct {
 	Priority        string        `json:"priority,omitempty"`
 	Status          string        `json:"status,omitempty"`
 	Recipient       string        `json:"recipient,omitempty"`
+	Requester       Requester     `json:"requester,omitempty"`
 	RequesterID     int64         `json:"requester_id,omitempty"`
 	SubmitterID     int64         `json:"submitter_id,omitempty"`
 	AssigneeID      int64         `json:"assignee_id,omitempty"`
@@ -107,6 +108,12 @@ type Ticket struct {
 	Comment TicketComment `json:"comment,omitempty"`
 
 	// TODO: TicketAudit (POST only) #126
+}
+
+type Requester struct {
+	LocaleID uint64 `json:"locale_id,omitempty"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
 }
 
 type TicketListOptions struct {

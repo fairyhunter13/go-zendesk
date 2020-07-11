@@ -13,7 +13,7 @@ import (
 
 func TestGetTickets(t *testing.T) {
 	mockAPI := newMockAPI(http.MethodGet, "tickets.json")
-	client := newTestClient(mockAPI)
+	client := newTestClientBearer(mockAPI)
 	defer mockAPI.Close()
 
 	tickets, _, err := client.GetTickets(ctx, &TicketListOptions{
@@ -64,7 +64,7 @@ func TestGetTicket(t *testing.T) {
 			Rel  string                 `json:"rel"`
 		}{
 			From: map[string]interface{}{
-				"address": "nukosuke@lavabit.com",
+				"address": "fairyhunter13@gmail.com",
 				"name":    "Yosuke Tamura",
 			},
 			To: map[string]interface{}{

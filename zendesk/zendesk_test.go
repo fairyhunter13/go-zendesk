@@ -45,11 +45,20 @@ func newMockAPIWithStatus(method string, filename string, status int) *httptest.
 }
 
 func newTestClient(mockAPI *httptest.Server) *Client {
-	c := &Client{
-		httpClient: http.DefaultClient,
-		credential: NewAPITokenCredential("", ""),
-	}
-	c.SetEndpointURL(mockAPI.URL)
+	c, _ := NewClient(
+		http.DefaultClient,
+		WithCredential(NewAPITokenCredential("", "")),
+		WithEndpointURL(mockAPI.URL),
+	)
+	return c
+}
+
+func newTestClientBearer(mockAPI *httptest.Server) *Client {
+	c, _ := NewClient(
+		http.DefaultClient,
+		WithCredential(NewOAuthCredential("hello")),
+		WithEndpointURL(mockAPI.URL),
+	)
 	return c
 }
 
@@ -62,8 +71,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestSetHeader(t *testing.T) {
-	client, _ := NewClient(nil)
-	client.SetHeader("Header1", "hogehoge")
+	client, _ := NewClient(nil, WithHeader("Header1", "hogehoge"))
 
 	if client.headers["Header1"] != "hogehoge" {
 		t.Fatal("Header1 is wrong")
@@ -73,8 +81,8 @@ func TestSetHeader(t *testing.T) {
 func TestSetSubdomainSuccess(t *testing.T) {
 	validSubdomain := "subdomain"
 
-	client, _ := NewClient(&http.Client{})
-	if err := client.SetSubdomain(validSubdomain); err != nil {
+	_, err := NewClient(&http.Client{}, WithSubdomain(validSubdomain))
+	if err != nil {
 		t.Fatal("SetSubdomain should success")
 	}
 }
@@ -82,23 +90,22 @@ func TestSetSubdomainSuccess(t *testing.T) {
 func TestSetSubdomainFail(t *testing.T) {
 	invalidSubdomain := ".subdomain"
 
-	client, _ := NewClient(&http.Client{})
-	if err := client.SetSubdomain(invalidSubdomain); err == nil {
+	_, err := NewClient(&http.Client{}, WithSubdomain(invalidSubdomain))
+	if err == nil {
 		t.Fatal("SetSubdomain should fail")
 	}
 }
 
 func TestSetEndpointURL(t *testing.T) {
-	client, _ := NewClient(nil)
-	if err := client.SetEndpointURL("http://127.0.0.1:3000"); err != nil {
+	_, err := NewClient(nil, WithEndpointURL("http://127.0.0.1:3000"))
+	if err != nil {
 		t.Fatal("SetEndpointURL should success")
 	}
 }
 
 func TestSetCredential(t *testing.T) {
-	client, _ := NewClient(nil)
 	cred := NewBasicAuthCredential("john.doe@example.com", "password")
-	client.SetCredential(cred)
+	client, _ := NewClient(nil, WithCredential(cred))
 
 	if email := client.credential.Email(); email != "john.doe@example.com" {
 		t.Fatal("client.credential.Email() returns wrong email: " + email)
